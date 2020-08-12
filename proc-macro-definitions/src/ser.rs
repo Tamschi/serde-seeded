@@ -60,7 +60,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                                 errors = quote!(#errors #error).into()
                             },
                             |(paren, custom_seeder): (_, TokenStream)| {
-                                serialize = quote_spanned!(paren.span=> &#custom_seeder(#serialize))
+                                serialize = quote_spanned!(paren.span=> &#custom_seeder.seeded(#serialize))
                             },
                         );
                     }
@@ -76,9 +76,12 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 #[automatically_derived]
                 impl #name {
                     pub fn seeded<'a>(&'a self) -> impl 'a + #serde_seeded::serde::Serialize {
-                        use #serde_seeded::serde::{
-                            ser::{self, SerializeStruct as _},
-                            export::Result,
+                        use #serde_seeded::{
+                            Seeder,
+                            serde::{
+                                ser::{self, SerializeStruct as _},
+                                export::Result,
+                            },
                         };
 
                         struct Seeded<'a>(&'a #name);
