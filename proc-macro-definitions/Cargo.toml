@@ -1,0 +1,15 @@
+[package]
+name = "serde-seeded_proc-macro-definitions"
+version = "0.0.0-dev"
+authors = ["Tamme Schichler <tamme@schichler.dev>"]
+edition = "2018"
+publish = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro-crate = "0.1.5"
+proc-macro2 = "1.0.19"
+quote = "1.0.7"
+syn = { version = "1.0.38", default-features = false, features = ["full"] } #TODO: Limit features.
