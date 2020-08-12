@@ -9,6 +9,7 @@ publish = false
 proc-macro = true
 
 [dependencies]
+call2-for-syn = "1.0.0"
 proc-macro-crate = "0.1.5"
 proc-macro2 = "1.0.19"
 quote = "1.0.7"

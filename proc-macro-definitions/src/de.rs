@@ -16,7 +16,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 impl<'de> de::DeserializeSeed<'de> for Seed {
                     type Value = #name;
                     fn deserialize<D: de::Deserializer<'de>>(self, _: D) -> ::std::result::Result<Self::Value, D::Error> {
-                        todo!()
+                        todo!("seed()")
                     }
                 }
 
