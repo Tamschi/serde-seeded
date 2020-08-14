@@ -23,7 +23,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 let mut attrs: Vec<_> = field
                     .attrs
                     .iter()
-                    .filter(|a| a.path.is_ident("seeded"))
+                    .filter(|a| a.path.is_ident("seeded") || a.path.is_ident("seeded_ser"))
                     .collect();
 
                 let mut errors = if attrs.len() > 1 {
@@ -60,7 +60,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                                 errors = quote!(#errors #error).into()
                             },
                             |(paren, custom_seeder): (_, TokenStream)| {
-                                serialize = quote_spanned!(paren.span=> &#custom_seeder.seeded(#serialize))
+                                serialize =
+                                    quote_spanned!(paren.span=> &#custom_seeder.seeded(#serialize))
                             },
                         );
                     }
