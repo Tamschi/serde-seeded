@@ -13,4 +13,4 @@ call2-for-syn = "1.0.0"
 proc-macro-crate = "0.1.5"
 proc-macro2 = "1.0.19"
 quote = "1.0.7"
-syn = { version = "1.0.38", default-features = false, features = ["full"] } #TODO: Limit features.
+syn = { version = "1.0.38", features = ["full"] } #TODO: Limit features.
