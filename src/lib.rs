@@ -6,7 +6,7 @@ pub trait Seeder<'a, T> {
     type Seed: for<'de> de::DeserializeSeed<'de, Value = T>;
     type Seeded: 'a + ser::Serialize;
     fn seed(self) -> Self::Seed;
-    fn seeded(self, value: &'a T) -> Self::Seeded;
+    fn seeded(&'a self, value: &'a T) -> Self::Seeded;
 }
 
 #[doc(hidden)]
