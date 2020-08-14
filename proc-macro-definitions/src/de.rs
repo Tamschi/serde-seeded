@@ -1,13 +1,15 @@
-use crate::serde_seeded;
-use call2_for_syn::call2;
-use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned, ToTokens};
-use std::borrow::Cow;
-use syn::{
-    parenthesized,
-    punctuated::{Pair, Punctuated},
-    spanned::Spanned as _,
-    Data, DeriveInput, Error, FnArg, Ident, PatType, Token,
+use {
+    crate::serde_seeded,
+    call2_for_syn::call2,
+    proc_macro2::TokenStream,
+    quote::{quote, quote_spanned, ToTokens},
+    std::borrow::Cow,
+    syn::{
+        parenthesized,
+        punctuated::{Pair, Punctuated},
+        spanned::Spanned as _,
+        Data, DeriveInput, Error, FnArg, Ident, PatType, Token,
+    },
 };
 
 pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
@@ -115,7 +117,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 impl #name {
                     pub fn seed<'de>(#(#args),*) -> impl #serde_seeded::serde::de::DeserializeSeed<'de, Value = Self> {
                         use #serde_seeded::{
-                            Seeder,
+                            DeSeeder as _,
+                            SerSeeder as _,
                             serde::de,
                         };
 

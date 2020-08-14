@@ -1,9 +1,11 @@
-use crate::serde_seeded;
-use call2_for_syn::call2;
-use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned};
-use std::borrow::Cow;
-use syn::{parenthesized, spanned::Spanned as _, Data, DeriveInput, Error, Ident};
+use {
+    crate::serde_seeded,
+    call2_for_syn::call2,
+    proc_macro2::TokenStream,
+    quote::{quote, quote_spanned},
+    std::borrow::Cow,
+    syn::{parenthesized, spanned::Spanned as _, Data, DeriveInput, Error, Ident},
+};
 
 pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &input.ident;
@@ -78,7 +80,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 impl #name {
                     pub fn seeded<'a>(&'a self) -> impl 'a + #serde_seeded::serde::Serialize {
                         use #serde_seeded::{
-                            Seeder,
+                            DeSeeder as _,
+                            SerSeeder as _,
                             serde::{
                                 ser::{self, SerializeStruct as _},
                                 export::Result,
