@@ -5,8 +5,8 @@ use {
     serde::{de, ser},
 };
 
-pub trait DeSeeder<T> {
-    type Seed: for<'de> de::DeserializeSeed<'de, Value = T>;
+pub trait DeSeeder<'de, T> {
+    type Seed: de::DeserializeSeed<'de, Value = T>;
     fn seed(self) -> Self::Seed;
 }
 
@@ -19,10 +19,10 @@ pub trait SerSeeder<'s, T> {
 pub use serde;
 
 #[derive(Debug, Copy, Clone)]
-pub struct FunctionDeSeeder<F: Function>(pub F);
-impl<F: Function<Args = ()>, T> DeSeeder<T> for FunctionSerSeeder<F>
+pub struct FunctionDeSeeder<F>(pub F);
+impl<'de, F: Function<Args = ()>, T> DeSeeder<'de, T> for FunctionSerSeeder<F>
 where
-    F::Output: for<'de> de::DeserializeSeed<'de, Value = T>,
+    F::Output: de::DeserializeSeed<'de, Value = T>,
 {
     type Seed = F::Output;
     fn seed(self) -> Self::Seed {
