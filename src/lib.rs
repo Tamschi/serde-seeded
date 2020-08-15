@@ -31,7 +31,7 @@ where
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct FunctionSerSeeder<F: Function>(pub F);
+pub struct FunctionSerSeeder<F>(pub F);
 impl<'s: 'a, 'a, F: Function<Args = (&'a T,)>, T: 'a> SerSeeder<'s, T> for FunctionSerSeeder<F>
 where
     F::Output: 's + ser::Serialize,
