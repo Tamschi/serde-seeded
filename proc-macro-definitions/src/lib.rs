@@ -10,7 +10,7 @@ use {
 mod de;
 mod ser;
 
-#[proc_macro_derive(seeded, attributes(seeded, seeded_ser))]
+#[proc_macro_derive(seeded, attributes(seeded, seeded_ser, seed_args, seed_args_ser))]
 pub fn seeded(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     ser::expand_derive(&input)
@@ -18,7 +18,7 @@ pub fn seeded(input: TokenStream) -> TokenStream {
         .into()
 }
 
-#[proc_macro_derive(seed, attributes(seeded, seed_args, seeded_de))]
+#[proc_macro_derive(seed, attributes(seeded, seeded_de, seed_args, seed_args_de))]
 pub fn seed(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     de::expand_derive(&input)

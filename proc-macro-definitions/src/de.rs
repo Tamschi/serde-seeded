@@ -20,25 +20,30 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
     let args = input
         .attrs
         .iter()
-        .filter(|a| a.path.is_ident("seed_args"))
+        .filter(|a| a.path.is_ident("seed_args") || a.path.is_ident("seed_args_de"))
         .map(|a| {
             call2(a.tokens.clone(), |input| {
                 let args;
                 parenthesized!(args in input);
                 let args = Punctuated::<FnArg, Token![,]>::parse_terminated(&args)?
                     .into_pairs()
-                    .map(Pair::into_value);
+                    .map(|pair| match pair {
+                        punctuated @ Pair::Punctuated(_, _) => punctuated,
+                        Pair::End(arg) => {
+                            let comma = Token![,](arg.span());
+                            Pair::Punctuated(arg, comma)
+                        }
+                    });
                 Ok(args)
             })
         })
-        //FIXME: Dropping the commas here isn't great for error spans.
         .filter_map(|r| r.map_err(|e| errors.push(e.to_compile_error())).ok())
         .flatten()
         .collect::<Vec<_>>();
 
     let arg_names = args
         .iter()
-        .map(|arg| match arg {
+        .map(|arg| match arg.clone().into_value() {
             FnArg::Receiver(r) => r.self_token.into_token_stream(),
             FnArg::Typed(PatType { pat, .. }) => pat.into_token_stream(),
         })
@@ -66,7 +71,10 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 
                 if attrs.len() > 1 {
                     let mut attrs = attrs.split_off(1).into_iter().map(|a| {
-                        Error::new_spanned(a, "Repeated #[seeded] attribute on the same field")
+                        Error::new_spanned(
+                            a,
+                            "Multiple #[seeded] or #[seeded_de] attributes on the same field",
+                        )
                     });
                     let mut first = attrs.next().unwrap();
                     for next in attrs {
@@ -115,7 +123,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
                 #(#errors)*
                 #[automatically_derived]
                 impl #name {
-                    pub fn seed<'de>(#(#args),*) -> impl #serde_seeded::serde::de::DeserializeSeed<'de, Value = Self> {
+                    pub fn seed<'de>(#(#args)*) -> impl #serde_seeded::serde::de::DeserializeSeed<'de, Value = Self> {
                         use #serde_seeded::{
                             DeSeeder as _,
                             SerSeeder as _,
