@@ -10,9 +10,9 @@ pub trait DeSeeder<T> {
     fn seed(self) -> Self::Seed;
 }
 
-pub trait SerSeeder<'s, T> {
-    type Seeded: 's + ser::Serialize;
-    fn seeded(&'s self, value: &'s T) -> Self::Seeded;
+pub trait SerSeeder<'seeder, 'value, T> {
+    type Seeded: 'value + ser::Serialize;
+    fn seeded(&'seeder self, value: &'value T) -> Self::Seeded;
 }
 
 #[doc(hidden)]
@@ -32,12 +32,13 @@ where
 
 #[derive(Debug, Copy, Clone)]
 pub struct FunctionSerSeeder<F: Function>(pub F);
-impl<'s: 'a, 'a, F: Function<Args = (&'a T,)>, T: 'a> SerSeeder<'s, T> for FunctionSerSeeder<F>
+impl<'seeder: 'value, 'value, F: Function<Args = (&'value T,)>, T: 'value>
+    SerSeeder<'seeder, 'value, T> for FunctionSerSeeder<F>
 where
-    F::Output: 's + ser::Serialize,
+    F::Output: 'seeder + ser::Serialize,
 {
     type Seeded = F::Output;
-    fn seeded(&'s self, value: &'s T) -> Self::Seeded {
+    fn seeded(&'seeder self, value: &'value T) -> Self::Seeded {
         self.0.call((value,))
     }
 }
