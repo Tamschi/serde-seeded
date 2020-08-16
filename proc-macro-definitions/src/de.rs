@@ -1,4 +1,4 @@
-use crate::{serde_seeded, shared::ensure_second};
+use crate::serde_seeded;
 use call2_for_syn::call2;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
@@ -9,28 +9,26 @@ use syn::{
 	spanned::Spanned as _,
 	Data, DeriveInput, Error, FnArg, GenericParam, Generics, Ident, Lifetime, PatType, Token,
 };
-use wyz::{Pipe as _, TapOption as _};
+use wyz::TapOption as _;
 
 pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 	let name = &input.ident;
 	let serde_seeded = serde_seeded();
 	let mut errors = vec![];
 
-	// let type_generics_lifetimes = input.generics.lifetimes().collect::<Vec<_>>();
-	// let type_generics_lifetime_lifetimes = type_generics_lifetimes
-	// 	.iter()
-	// 	.map(|l| &l.lifetime)
-	// 	.collect::<Vec<_>>();
-	let type_generics_types = input.generics.type_params().collect::<Vec<_>>();
+	let mut type_generics_types = vec![];
+	for generic in input.generics.params.iter() {
+		match generic {
+			GenericParam::Type(ty) => type_generics_types.push(ty),
+			GenericParam::Lifetime(l) => {errors.push(Error::new_spanned(l, "serde-seeded::seed: Lifetime parameters are currently not supported here. You can request or help out with implementation at <https://github.com/Tamschi/serde-seeded/issues/1>.").to_compile_error())}
+			GenericParam::Const(c) => {errors.push(Error::new_spanned(c, "serde-seeded::seed: Const parameters are currently not supported here. You can request or help out with implementation at <https://github.com/Tamschi/serde-seeded/issues/2>.").to_compile_error())}
+		}
+	}
+
 	let type_generics_type_idents = type_generics_types
 		.iter()
 		.map(|t| &t.ident)
 		.collect::<Vec<_>>();
-	// let type_generics_consts = input.generics.const_params().collect::<Vec<_>>();
-	// let type_generics_const_idents = type_generics_consts
-	// 	.iter()
-	// 	.map(|c| &c.ident)
-	// 	.collect::<Vec<_>>();
 	let type_generics_where = &input.generics.where_clause;
 
 	let fn_generics = input
@@ -48,23 +46,26 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 			.ok()
 		})
 		.collect::<Vec<_>>();
-	let fn_generics_lifetimes = fn_generics
-		.iter()
-		.flat_map(|g| g.lifetimes())
-		.collect::<Vec<_>>();
+
+	let mut fn_generics_lifetimes = vec![];
+	let mut fn_generics_types = vec![];
+	for generic in fn_generics.iter().flat_map(|g| g.params.iter()) {
+		match generic {
+			GenericParam::Type(ty) => fn_generics_types.push(ty),
+			GenericParam::Lifetime(l) => fn_generics_lifetimes.push(l),
+			GenericParam::Const(c) => {errors.push(Error::new_spanned(c, "serde-seeded::seed: Const parameters are currently not supported here. You can request or help out with implementation at <https://github.com/Tamschi/serde-seeded/issues/3>.").to_compile_error())}
+		}
+	}
+
 	let fn_generics_lifetime_lifetimes = fn_generics_lifetimes
 		.iter()
 		.map(|l| &l.lifetime)
-		.collect::<Vec<_>>();
-	let fn_generics_types = fn_generics
-		.iter()
-		.flat_map(|g| g.type_params())
 		.collect::<Vec<_>>();
 	let fn_generics_type_idents = fn_generics_types
 		.iter()
 		.map(|t| &t.ident)
 		.collect::<Vec<_>>();
-	// fn_generics_consts
+	// Where clauses on derived functions are missing too but don't have a specific error since there's no syntax to specify them yet. The GitHub issue is <https://github.com/Tamschi/serde-seeded/issues/4>.
 
 	let mut default_de = vec![Lifetime::new("'de", Span::mixed_site())];
 	let de = fn_generics_lifetime_lifetimes
@@ -258,7 +259,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				}
 			})
 		}
-		Data::Enum(_) => todo!("Data::Enum"),
-		Data::Union(_) => todo!("Data::Union"),
+		Data::Enum(e) => Err(Error::new_spanned(e.enum_token, "serde-seeded derive macros are not available on enums yet. You can request this feature at <https://github.com/Tamschi/serde-seeded/issues/5>.")),
+		Data::Union(u) => Err(Error::new_spanned(u.union_token, "serde-seeded derive macros are not available on unions yet. You can request this feature at <https://github.com/Tamschi/serde-seeded/issues/6>.")),
 	}
 }

@@ -151,7 +151,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				}
 			})
 		}
-		Data::Enum(_) => todo!("Data::Enum"),
-		Data::Union(_) => todo!("Data::Union"),
+		Data::Enum(e) => Err(Error::new_spanned(e.enum_token, "serde-seeded derive macros are not available on enums yet. You can request this feature at <https://github.com/Tamschi/serde-seeded/issues/5>.")),
+		Data::Union(u) => Err(Error::new_spanned(u.union_token, "serde-seeded derive macros are not available on unions yet. You can request this feature at <https://github.com/Tamschi/serde-seeded/issues/6>.")),
 	}
 }
