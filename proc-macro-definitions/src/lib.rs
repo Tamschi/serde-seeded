@@ -6,6 +6,8 @@ use syn::{parse_macro_input, DeriveInput, Ident};
 
 mod de;
 mod ser;
+mod shared;
+
 #[proc_macro_derive(
 	seed,
 	attributes(

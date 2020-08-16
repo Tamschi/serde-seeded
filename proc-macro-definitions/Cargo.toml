@@ -14,3 +14,4 @@ proc-macro-crate = "0.1.5" #TODO: Use Span::mixed_site() and $crate instead.
 proc-macro2 = "1.0.19"
 quote = "1.0.7"
 syn = { version = "1.0.38", features = ["full"] } #TODO: Limit features.
+wyz = "0.2.0"
