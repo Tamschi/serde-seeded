@@ -9,19 +9,38 @@ use {
 
 mod de;
 mod ser;
-
-#[proc_macro_derive(seeded, attributes(seeded, seeded_ser, seed_args, seed_args_ser))]
-pub fn seeded(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(
+    seed,
+    attributes(
+        seeded,
+        seeded_de,
+        seed_args,
+        seed_args_de,
+        seed_generics,
+        seed_generics_de
+    )
+)]
+pub fn seed(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    ser::expand_derive(&input)
+    de::expand_derive(&input)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }
 
-#[proc_macro_derive(seed, attributes(seeded, seeded_de, seed_args, seed_args_de))]
-pub fn seed(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(
+    seeded,
+    attributes(
+        seeded,
+        seeded_ser,
+        seed_args,
+        seed_args_ser,
+        seed_generics,
+        seed_generics_ser
+    )
+)]
+pub fn seeded(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    de::expand_derive(&input)
+    ser::expand_derive(&input)
         .unwrap_or_else(|e| e.to_compile_error())
         .into()
 }

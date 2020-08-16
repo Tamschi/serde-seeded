@@ -17,6 +17,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
     let serde_seeded = serde_seeded();
     let mut errors = vec![];
 
+    let type_generics = &input.generics;
+
     let args = input
         .attrs
         .iter()
@@ -122,7 +124,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
             Ok(quote! {
                 #(#errors)*
                 #[automatically_derived]
-                impl #name {
+                impl #name#type_generics {
                     pub fn seed<'de>(#(#args)*) -> impl #serde_seeded::serde::de::DeserializeSeed<'de, Value = Self> {
                         use #serde_seeded::{
                             DeSeeder as _,
