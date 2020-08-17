@@ -200,7 +200,18 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							#(#fn_generics_lifetimes,)*
 							#(#type_generics_types,)*
 							#(#fn_generics_types,)*
-						> { #(#args),* };
+						> {
+							#(#args,)*
+
+							// Note: This is technically avoidable, I think, but that decoupling wouldn't
+							// lead to additional compatibility of the outer method and seems like it would
+							// make the macro harder to reason about.
+							limiter: PhantomData<(
+								#(&#fn_generics_lifetime_lifetimes (),)*
+								#(#type_generics_types,)*
+								// But not #fn_generics_types, since those should appear in the #args.
+							)>,
+						};
 						impl<
 							#(#default_de,)*
 							#(#fn_generics_lifetimes,)*
@@ -217,7 +228,13 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 									#(#fn_generics_lifetimes,)*
 									#(#type_generics_types,)*
 									#(#fn_generics_types,)*
-								> {#(#args),*};
+								> {
+									#(#args,)*
+									limiter: PhantomData<(
+										#(&#fn_generics_lifetime_lifetimes (),)*
+										#(#type_generics_types,)*
+									)>,
+								};
 								impl<
 									#(#default_de,)*
 									#(#fn_generics_lifetimes,)*
@@ -236,7 +253,10 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 									}
 
 									fn visit_seq<A: de::SeqAccess<#de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
-										let Self {#(#arg_names),*} = self;
+										let Self {
+											#(#arg_names,)*
+											limiter: _,
+										} = self;
 
 										#(let #field_idents = seq.#nexts?.ok_or_else(|| de::Error::invalid_length(0, &self))?;)*
 
@@ -246,17 +266,26 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 									}
 								}
 
-								let Self {#(#arg_names),*} = self;
+								let Self {
+									#(#arg_names,)*
+									limiter: _,
+								} = self;
 								const FIELD_NAMES: [&'static str; #len] = [#(stringify!(#field_idents), )*];
 								deserializer.deserialize_struct(
 									stringify!(#name),
 									FIELD_NAMES.as_ref(),
-									Visitor {#(#arg_names),*},
+									Visitor {
+										#(#arg_names,)*
+										limiter: PhantomData,
+									},
 								)
 							}
 						}
 
-						Seed {#(#arg_names),*}
+						Seed {
+							#(#arg_names,)*
+							limiter: PhantomData,
+						}
 					}
 				}
 			})

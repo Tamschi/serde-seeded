@@ -188,7 +188,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				> #name<
 					#(#type_generics_lifetime_lifetimes,)*
 					#(#type_generics_type_idents,)*
-				> {
+				> #type_generics_where {
 					pub fn seeded<
 						#(#default_ser,)*
 						#(#fn_generics_lifetimes,)*
@@ -230,7 +230,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							#(#fn_generics_lifetime_lifetimes,)*
 							#(#type_generics_type_idents,)*
 							#(#fn_generics_type_idents,)*
-						> {
+						> #type_generics_where {
 							fn serialize<S: ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
 								let mut serialize_struct = serializer.serialize_struct(stringify!(#name), #field_count)?;
 								let Seeded {
