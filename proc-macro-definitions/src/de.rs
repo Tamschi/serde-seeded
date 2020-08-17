@@ -188,6 +188,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 						#(#fn_generics_lifetimes,)*
 						#(#fn_generics_types,)*
 					>(#(#args),*) -> impl #serde_seeded::serde::de::DeserializeSeed<#de, Value = Self> {
+
+						//TODO: Use fully qualified calls instead.
 						use #serde_seeded::{
 							DeSeeder as _,
 							SerSeeder as _,
@@ -198,7 +200,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							#(#fn_generics_lifetimes,)*
 							#(#type_generics_types,)*
 							#(#fn_generics_types,)*
-							> {#(#args),*};
+						> { #(#args),* };
 						impl<
 							#(#default_de,)*
 							#(#fn_generics_lifetimes,)*

@@ -184,10 +184,18 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				#[automatically_derived]
 				impl<
 					#(#type_generics_lifetimes,)*
+					#(#type_generics_types,)*
 				> #name<
 					#(#type_generics_lifetime_lifetimes,)*
+					#(#type_generics_type_idents,)*
 				> {
-					pub fn seeded<#ser>(&#ser self, #(#args,)*) -> impl #ser + #serde_seeded::serde::Serialize {
+					pub fn seeded<
+						#(#default_ser,)*
+						#(#fn_generics_lifetimes,)*
+						#(#fn_generics_types,)*
+					>(&#ser self, #(#args,)*) -> impl #ser + #serde_seeded::serde::Serialize {
+
+						//TODO: Use fully qualified calls instead.
 						use #serde_seeded::{
 							DeSeeder as _,
 							SerSeeder as _,
@@ -198,20 +206,30 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 						};
 
 						struct Seeded<
-							#ser,
+							#(#default_ser,)*
 							#(#type_generics_lifetimes,)*
-						>{
+							#(#fn_generics_lifetimes,)*
+							#(#type_generics_types,)*
+							#(#fn_generics_types,)*
+						> {
 							this: &#ser #name<
 								#(#type_generics_lifetime_lifetimes,)*
+								#(#type_generics_type_idents,)*
 							>,
 							#(#args,)*
 						};
 						impl<
-							#ser,
+							#(#default_ser,)*
 							#(#type_generics_lifetimes,)*
+							#(#fn_generics_lifetimes,)*
+							#(#type_generics_types,)*
+							#(#fn_generics_types,)*
 						> ser::Serialize for Seeded<
-							#ser,
+							#(#default_ser,)*
 							#(#type_generics_lifetime_lifetimes,)*
+							#(#fn_generics_lifetime_lifetimes,)*
+							#(#type_generics_type_idents,)*
+							#(#fn_generics_type_idents,)*
 						> {
 							fn serialize<S: ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
 								let mut serialize_struct = serializer.serialize_struct(stringify!(#name), #field_count)?;
