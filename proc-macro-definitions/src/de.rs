@@ -19,8 +19,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 	let mut type_generics_types = vec![];
 	for generic in input.generics.params.iter() {
 		match generic {
-			GenericParam::Type(ty) => type_generics_types.push(ty),
 			GenericParam::Lifetime(l) => {errors.push(Error::new_spanned(l, "serde-seeded::seed: Lifetime parameters are currently not supported here. You can request or help out with implementation at <https://github.com/Tamschi/serde-seeded/issues/1>.").to_compile_error())}
+			GenericParam::Type(ty) => type_generics_types.push(ty),
 			GenericParam::Const(c) => {errors.push(Error::new_spanned(c, "serde-seeded::seed: Const parameters are currently not supported here. You can request or help out with implementation at <https://github.com/Tamschi/serde-seeded/issues/2>.").to_compile_error())}
 		}
 	}
