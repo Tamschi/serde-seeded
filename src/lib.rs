@@ -1,8 +1,7 @@
 pub use serde_seeded_proc_macro_definitions::*;
 
 use erased_serde as eser;
-use serde::{de, ser};
-use std::marker::PhantomData;
+use serde::de;
 
 pub trait DeSeeder<'de, T> {
 	type Seed: de::DeserializeSeed<'de, Value = T>;
@@ -36,11 +35,18 @@ impl<'de, Seed: de::DeserializeSeed<'de>, F: Fn() -> Seed> DeSeeder<'de, Seed::V
 }
 
 #[derive(Debug, Copy, Clone)]
-pub struct FnSerSeeder<F, Seeded>(pub F, PhantomData<Seeded>);
-impl<F: for<'a> Fn(&'a T) -> Seeded, T, Seeded: ser::Serialize> SerSeeder<T>
-	for FnSerSeeder<F, Seeded>
-{
+pub struct FnSerSeeder<F>(pub F);
+/// The struct constructor doesn't always coerce closures correctly, but this here does.
+impl<F> FnSerSeeder<F> {
+	pub fn new<T>(f: F) -> Self
+	where
+		F: for<'a> Fn(&'a T) -> Seeded<'a>,
+	{
+		Self(f)
+	}
+}
+impl<F: for<'a> Fn(&'a T) -> Seeded<'a>, T> SerSeeder<T> for FnSerSeeder<F> {
 	fn seeded<'s>(&'s self, value: &'s T) -> Box<dyn 's + eser::Serialize> {
-		Box::new(self.0(value)) as _
+		self.0(value)
 	}
 }
