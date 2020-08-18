@@ -21,7 +21,7 @@ impl<S: SerSeeder<T>, T> SerSeeder<T> for &S {
 }
 
 #[doc(hidden)]
-pub use {erased_serde, serde};
+pub use {erased_serde, log, serde};
 
 #[derive(Debug, Copy, Clone)]
 pub struct FnDeSeeder<F>(pub F);

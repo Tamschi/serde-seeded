@@ -107,7 +107,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 
 	match &input.data {
 		Data::Struct(data) => {
-			let mut field_idents = vec![];			
+			let mut field_idents = vec![];
 			let mut nexts = vec![];
 
 			for (i, field) in data.fields.iter().enumerate() {
@@ -258,7 +258,9 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 											limiter: _,
 										} = self;
 
+										#serde_seeded::log::trace!("Starting to deserialize {}...", stringify!(#name));
 										#(let #field_idents = seq.#nexts?.ok_or_else(|| de::Error::invalid_length(0, &format!("Struct with {} fields", #len).as_str()))?;)*
+										#serde_seeded::log::trace!("Done deserializing {}.", stringify!(#name));
 
 										Ok(#name {
 											#(#field_idents,)*
