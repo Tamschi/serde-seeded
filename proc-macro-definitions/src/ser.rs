@@ -151,7 +151,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				let mut serialize =ident.to_token_stream();
 				if let Some(attr) = attr {
 					if attr.tokens.is_empty() {
-						serialize = quote_spanned!(attr.path.span()=> #serialize.seeded());
+						serialize = quote_spanned!(attr.path.span()=> &#serialize.seeded());
 					} else {
 						let tokens = &attr.tokens;
 
@@ -212,11 +212,16 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							#(#type_generics_types,)*
 							#(#fn_generics_types,)*
 						> {
-							this: &#ser #name<
+							__this: &#ser #name<
 								#(#type_generics_lifetime_lifetimes,)*
 								#(#type_generics_type_idents,)*
 							>,
 							#(#args,)*
+							__phantom: PhantomData<(
+								#(&#default_ser (),)*
+								#(&#type_generics_lifetime_lifetimes (),)*
+								#(&#fn_generics_lifetime_lifetimes (),)*
+							)>,
 						};
 						impl<
 							#(#default_ser,)*
@@ -234,11 +239,12 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							fn serialize<S: ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
 								let mut serialize_struct = serializer.serialize_struct(stringify!(#name), #field_count)?;
 								let Seeded {
-									this: #name {
+									__this: #name {
 										#(#field_idents,)*
 									},
 									#(#arg_names,)*
-								} = self;
+									__phantom: _,
+								} = &self;
 
 								#(#serialize_fields)*
 
@@ -246,8 +252,9 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							}
 						}
 						Seeded {
-							this: self,
+							__this: self,
 							#(#arg_names,)*
+							__phantom: PhantomData,
 						}
 					}
 				}

@@ -15,6 +15,12 @@ pub trait SerSeeder<T> {
 }
 pub type Seeded<'s> = Box<dyn 's + eser::Serialize>;
 
+impl<S: SerSeeder<T>, T> SerSeeder<T> for &S {
+	fn seeded<'s>(&'s self, value: &'s T) -> Seeded<'s> {
+		S::seeded(self, value)
+	}
+}
+
 #[doc(hidden)]
 pub use {erased_serde, serde};
 

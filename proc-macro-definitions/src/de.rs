@@ -107,7 +107,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 
 	match &input.data {
 		Data::Struct(data) => {
-			let mut field_idents = vec![];
+			let mut field_idents = vec![];			
 			let mut nexts = vec![];
 
 			for (i, field) in data.fields.iter().enumerate() {
@@ -258,7 +258,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 											limiter: _,
 										} = self;
 
-										#(let #field_idents = seq.#nexts?.ok_or_else(|| de::Error::invalid_length(0, &self))?;)*
+										#(let #field_idents = seq.#nexts?.ok_or_else(|| de::Error::invalid_length(0, &format!("Struct with {} fields", #len).as_str()))?;)*
 
 										Ok(#name {
 											#(#field_idents,)*
