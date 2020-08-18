@@ -206,7 +206,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							// Note: This is technically avoidable, I think, but that decoupling wouldn't
 							// lead to additional compatibility of the outer method and seems like it would
 							// make the macro harder to reason about.
-							limiter: PhantomData<(
+							limiter: ::std::marker::PhantomData<(
 								#(&#fn_generics_lifetime_lifetimes (),)*
 								#(#type_generics_types,)*
 								// But not #fn_generics_types, since those should appear in the #args.
@@ -230,7 +230,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 									#(#fn_generics_types,)*
 								> {
 									#(#args,)*
-									limiter: PhantomData<(
+									limiter: ::std::marker::PhantomData<(
 										#(&#fn_generics_lifetime_lifetimes (),)*
 										#(#type_generics_types,)*
 									)>,
@@ -276,7 +276,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 									FIELD_NAMES.as_ref(),
 									Visitor {
 										#(#arg_names,)*
-										limiter: PhantomData,
+										limiter: ::std::marker::PhantomData,
 									},
 								)
 							}
@@ -284,7 +284,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 
 						Seed {
 							#(#arg_names,)*
-							limiter: PhantomData,
+							limiter: ::std::marker::PhantomData,
 						}
 					}
 				}

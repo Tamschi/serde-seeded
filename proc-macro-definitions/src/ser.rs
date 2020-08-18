@@ -217,7 +217,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 								#(#type_generics_type_idents,)*
 							>,
 							#(#args,)*
-							__phantom: PhantomData<(
+							__phantom: ::std::marker::PhantomData<(
 								#(&#default_ser (),)*
 								#(&#type_generics_lifetime_lifetimes (),)*
 								#(&#fn_generics_lifetime_lifetimes (),)*
@@ -254,7 +254,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 						Seeded {
 							__this: self,
 							#(#arg_names,)*
-							__phantom: PhantomData,
+							__phantom: ::std::marker::PhantomData,
 						}
 					}
 				}
