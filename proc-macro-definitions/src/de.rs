@@ -153,7 +153,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				nexts.push(if let Some(attr) = attr {
 					if attr.tokens.is_empty() {
 						let ty = &field.ty;
-						quote_spanned!(attr.path.span()=> next_element_seed(#ty::seed()))
+						quote_spanned!(ty.span()=> next_element_seed(#ty::seed()))
 					} else {
 						let tokens = &attr.tokens;
 
@@ -171,7 +171,8 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 					}
 				} else {
 					errors.push(Error::new_spanned(field, "#[seeded] or #[seeded_de] required").to_compile_error());
-					quote_spanned!(field.ty.span()=> next_element())
+					let ty = &field.ty;
+					quote_spanned!(ty.span()=> next_element_seed(#ty::seed()))
 				});
 			}
 			let len = field_idents.len();
