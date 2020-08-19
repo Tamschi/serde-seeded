@@ -148,10 +148,10 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 				let attr = attrs.drain(..).next();
 				assert_eq!(attrs.into_iter().count(), 0);
 
-				let mut serialize =ident.to_token_stream();
+				let serialize =
 				if let Some(attr) = attr {
 					if attr.tokens.is_empty() {
-						serialize = quote_spanned!(attr.path.span()=> &#serialize.seeded());
+						quote_spanned!(attr.path.span()=> &#ident.seeded())
 					} else {
 						let tokens = &attr.tokens;
 
@@ -161,16 +161,21 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 							Ok((paren, content.parse()?))
 						})
 						.map_or_else(
-							|error| errors.push(error.to_compile_error()),
-							|(paren, custom_seeder): (_, TokenStream)| {
-								serialize =
-									quote_spanned!(paren.span.resolved_at(Span::mixed_site())=> { // <-- No-field-shadowing!-brace.
-										&#custom_seeder.seeded(#serialize)
-									})
+							|error| {
+								errors.push(error.to_compile_error());
+								quote_spanned!(attr.path.span()=> ())
 							},
-						);
+							|(paren, custom_seeder): (_, TokenStream)| {
+								quote_spanned!(paren.span.resolved_at(Span::mixed_site())=> { // <-- No-field-shadowing!-brace.
+									&#custom_seeder.seeded(#ident)
+								})
+							},
+						)
 					}
-				}
+				} else {
+					errors.push(Error::new_spanned(field, "#[seeded] or #[seeded_ser] required").to_compile_error());
+					quote_spanned!(field.span()=> &())
+				};
 
 				serialize_fields.push(
 					quote_spanned! {ident.span().resolved_at(Span::mixed_site())=>

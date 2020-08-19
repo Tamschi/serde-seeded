@@ -170,6 +170,7 @@ pub fn expand_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
 						)
 					}
 				} else {
+					errors.push(Error::new_spanned(field, "#[seeded] or #[seeded_de] required").to_compile_error());
 					quote_spanned!(field.ty.span()=> next_element())
 				});
 			}
